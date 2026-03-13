@@ -5,16 +5,42 @@
 
 local baseUrl = "https://raw.githubusercontent.com/Waynesson1/sentrix/main/src"
 
-local function httpGet(_url)
-	-- Replace with your runtime HTTP fetch function.
-	-- Must return the response body as a string.
-	error("Provide httpGet(url) implementation for your runtime")
+-- Set this to your runtime HTTP function.
+-- Example: local customHttpGet = HttpGet
+local customHttpGet = nil
+
+-- Set this to your runtime compile function.
+-- Example: local customCompile = loadstring
+local customCompile = loadstring
+
+local function performHttpGet(url)
+	if type(customHttpGet) ~= "function" then
+		error("customHttpGet is nil. Set it to your runtime HTTP function.")
+	end
+
+	local ok, body = pcall(customHttpGet, url)
+	if not ok then
+		error(("HTTP request failed for %s: %s"):format(url, tostring(body)))
+	end
+
+	if type(body) ~= "string" then
+		error(("HTTP getter returned non-string body for %s"):format(url))
+	end
+
+	return body
 end
 
-local function compile(_source, _chunkName)
-	-- Replace with your runtime compile function, for example:
-	-- local fn, err = loadstring(source, chunkName)
-	error("Provide compile(source, chunkName) implementation for your runtime")
+local function compile(source, chunkName)
+	if type(customCompile) ~= "function" then
+		error("customCompile is nil. Set it to your runtime compile function.")
+	end
+
+	local fn, err = customCompile(source, chunkName)
+	if not fn then
+		error(("compile failed: %s"):format(tostring(err)))
+	end
+
+	return fn
 end
 
 local function normalizePath(path)
@@ -24,7 +50,7 @@ end
 local function fetchModule(path)
 	local rel = normalizePath(path)
 	local url = baseUrl .. "/" .. rel
-	local source = httpGet(url)
+	local source = performHttpGet(url)
 
 	if type(source) ~= "string" then
 		error(("http body was not string for %s"):format(url))
@@ -65,7 +91,7 @@ local app = Main.build({
 	manifest = manifest,
 	compile = compile,
 	httpGet = function(url)
-		return httpGet(url)
+		return performHttpGet(url)
 	end,
 	startOpen = true,
 	title = "Sentrix Core",
