@@ -7,7 +7,34 @@ local baseUrl = "https://raw.githubusercontent.com/Waynesson1/sentrix/main/src"
 
 -- Set this to your runtime HTTP function. It must return response body string.
 -- Example (executor): local customHttpGet = HttpGet
-local customHttpGet = nil
+local function autoHttpGet(url)
+	if type(httpGet) == "function" then
+		return httpGet(url)
+	end
+
+	if type(HttpGet) == "function" then
+		return HttpGet(url)
+	end
+
+	if type(request) == "function" then
+		local r = request({ Url = url, Method = "GET" })
+		return r and (r.Body or r.body)
+	end
+
+	if type(http_request) == "function" then
+		local r = http_request({ Url = url, Method = "GET" })
+		return r and (r.Body or r.body)
+	end
+
+	if syn and type(syn.request) == "function" then
+		local r = syn.request({ Url = url, Method = "GET" })
+		return r and (r.Body or r.body)
+	end
+
+	error("No supported HTTP API found (tried httpGet, HttpGet, request, http_request, syn.request)")
+end
+
+local customHttpGet = autoHttpGet
 
 -- Set this to your runtime compile function.
 -- Example: local customCompile = loadstring
