@@ -5,8 +5,8 @@
 
 local baseUrl = "https://raw.githubusercontent.com/Waynesson1/sentrix/main/src"
 
--- Set this to your runtime HTTP function.
--- Example: local customHttpGet = HttpGet
+-- Set this to your runtime HTTP function. It must return response body string.
+-- Example (executor): local customHttpGet = HttpGet
 local customHttpGet = nil
 
 -- Set this to your runtime compile function.
