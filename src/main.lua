@@ -27,6 +27,8 @@ function Main.build(runtime)
 		title = runtime.title or "Sentrix Core",
 	})
 
+	local app = nil
+
 	local createMenu = runtime.createMenu or function(opts)
 		return runtime.Menu.new(opts)
 	end
@@ -45,21 +47,50 @@ function Main.build(runtime)
 		})
 	end
 
-	root:addItem({
-		label = "Unload",
+	local scriptControl = runtime.Menu.new({
+		id = "script-control",
+		title = "Script Control",
+	})
+
+	scriptControl:addItem({
+		label = "Suspend",
+		getValue = function()
+			if app and app.isSuspended then
+				return "ON"
+			end
+
+			return "OFF"
+		end,
 		onSelect = function()
-			if runtime.onUnload then
-				runtime.onUnload()
+			if app then
+				app:toggleSuspend()
 			end
 		end,
 	})
 
-	return runtime.App.new({
+	scriptControl:addItem({
+		label = "Terminate",
+		onSelect = function()
+			if app then
+				app:terminate("menu-terminate")
+			end
+		end,
+	})
+
+	root:addItem({
+		label = "Script Control",
+		submenu = scriptControl,
+	})
+
+	app = runtime.App.new({
 		rootMenu = root,
 		input = runtime.input,
 		renderer = runtime.renderer,
 		startOpen = runtime.startOpen ~= false,
+		onTerminate = runtime.onUnload,
 	})
+
+	return app
 end
 
 return Main

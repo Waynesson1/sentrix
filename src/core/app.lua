@@ -25,7 +25,9 @@ function App.new(opts)
 		input = opts.input,
 		renderer = opts.renderer,
 		isOpen = opts.startOpen ~= false,
+		isSuspended = false,
 		shouldExit = false,
+		onTerminate = opts.onTerminate,
 	}, App)
 end
 
@@ -33,9 +35,33 @@ function App:toggle()
 	self.isOpen = not self.isOpen
 end
 
+function App:suspend()
+	self.isSuspended = true
+end
+
+function App:resume()
+	self.isSuspended = false
+end
+
+function App:toggleSuspend()
+	self.isSuspended = not self.isSuspended
+end
+
+function App:terminate(reason)
+	if self.shouldExit then
+		return
+	end
+
+	self.shouldExit = true
+
+	if self.onTerminate then
+		pcall(self.onTerminate, reason or "terminate")
+	end
+end
+
 function App:handleAction(action)
 	if action == "exit" then
-		self.shouldExit = true
+		self:terminate("exit-action")
 		return
 	end
 
@@ -62,6 +88,10 @@ function App:handleAction(action)
 end
 
 function App:update()
+	if self.shouldExit then
+		return false
+	end
+
 	local actions = normalizeActions(self.input:poll())
 
 	for _, action in ipairs(actions) do
@@ -73,6 +103,8 @@ function App:update()
 	else
 		self.renderer:renderClosed()
 	end
+
+	return true
 end
 
 return App

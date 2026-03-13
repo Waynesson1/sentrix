@@ -3,7 +3,7 @@
 -- Red-engine style GitHub bootstrap template.
 -- Upload repo to GitHub, then set `baseUrl` and `httpGet` below.
 
-local baseUrl = "https://raw.githubusercontent.com/<user>/<repo>/main/src"
+local baseUrl = "https://raw.githubusercontent.com/Waynesson1/sentrix/main/src"
 
 local function httpGet(_url)
 	-- Replace with your runtime HTTP fetch function.
