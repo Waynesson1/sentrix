@@ -27,6 +27,7 @@ function App.new(opts)
 		isOpen = opts.startOpen ~= false,
 		isSuspended = false,
 		shouldExit = false,
+		onTick = opts.onTick,
 		onTerminate = opts.onTerminate,
 	}, App)
 end
@@ -90,6 +91,10 @@ end
 function App:update()
 	if self.shouldExit then
 		return false
+	end
+
+	if self.onTick and not self.isSuspended then
+		pcall(self.onTick, self)
 	end
 
 	local actions = normalizeActions(self.input:poll())

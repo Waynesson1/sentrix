@@ -87,6 +87,7 @@ function Main.build(runtime)
 		input = runtime.input,
 		renderer = runtime.renderer,
 		startOpen = runtime.startOpen ~= false,
+		onTick = runtime.onTick,
 		onTerminate = runtime.onUnload,
 	})
 
